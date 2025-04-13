@@ -3,26 +3,35 @@ import pandas as pd
 from src.exception import CustomException
 from src.utils import load_object
 import os
+from pathlib import Path
 
 class PredictPipeline:
     def __init__(self):
-        pass
-
-    def predict(self,features):
+        # Get the TRUE project root (ml1 directory)
+        self.root_dir = Path(__file__).resolve().parent.parent.parent
+    
+    def predict(self, features):
         try:
-            model_path=os.path.join("artifacts","model.pkl")
-            preprocessor_path=os.path.join('artifacts','preprocessor.pkl')
-            print("Before Loading")
-            model=load_object(file_path=model_path)
-            preprocessor=load_object(file_path=preprocessor_path)
-            print("After Loading")
-            data_scaled=preprocessor.transform(features)
-            preds=model.predict(data_scaled)
+            # Path to artifacts - directly in project root
+            artifacts_dir = os.path.join(self.root_dir, "artifacts")
+            model_path = os.path.join(artifacts_dir, "model.pkl")
+            preprocessor_path = os.path.join(artifacts_dir, "preprocessor.pkl")
+            
+            # Debug prints
+            print(f"TRUE Project root: {self.root_dir}")
+            print(f"Artifacts directory contents: {os.listdir(artifacts_dir)}")
+            
+            # Load objects
+            model = load_object(file_path=model_path)
+            preprocessor = load_object(file_path=preprocessor_path)
+            
+            data_scaled = preprocessor.transform(features)
+            preds = model.predict(data_scaled)
             return preds
         
         except Exception as e:
-            raise CustomException(e,sys)
-
+            print(f"FULL ERROR DETAILS: {str(e)}")
+            raise CustomException(e, sys)
 
 
 class CustomData:
